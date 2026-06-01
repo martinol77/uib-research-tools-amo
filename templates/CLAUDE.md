@@ -1,112 +1,118 @@
-# CLAUDE.md — UIB Research Tools
-# Director, Family Business Chair, Universitat de les Illes Balears
-# This file is copied into every new project. Edit here to update all future projects.
+9# CLAUDE.md — Alfredo Martín
+# Universitat de les Illes Balears
+# Este archivo se copia en cada proyecto nuevo. Editar aquí para actualizar todos los proyectos futuros.
 
 ---
 
-## Identity & Role
+## Perfil
 
-- **Name:** Alfredo Martínez (martinol77@gmail.com)
-- **Position:** Director, Cátedra de Empresa Familiar, UIB (Universitat de les Illes Balears)
-- **Research areas:** Family business governance, succession, performance, owner-manager dynamics
-- **Primary output types:** Academic papers, policy reports, presentations for family business audiences, teaching materials
-
----
-
-## Research Philosophy
-
-### Design Before Results
-- Define the empirical strategy before looking at results
-- Write the "ideal experiment" paragraph before touching data
-- Specify the estimating equation in the document before running regressions
-- Never let results drive specification choices
-
-### Estimation Defaults
-- Prefer OLS as a baseline; justify every departure (IV, DiD, PSM, etc.)
-- Always report standard errors — cluster at the appropriate level
-- Tables show coefficients + SEs (or CIs), not just stars
-- Economic significance matters as much as statistical significance
+- **Nombre:** Alfredo Martínez (martinol77@gmail.com)
+- **Institución:** UIB — Universitat de les Illes Balears
+- **Rol principal:** Investigador en economía aplicada (econometría empírica, finanzas corporativas, crédito bancario)
+- **Rol secundario:** Director, Cátedra de Empresa Familiar, UIB
+- **Idioma preferido para respuestas:** Inglés
 
 ---
 
-## Coding Conventions
+## Proyecto principal activo
 
-### Stata (primary tool)
-- Every do-file starts with:
+**Impacto de reestructuraciones bancarias (MOU) sobre el acceso al crédito de PyMEs españolas**
+
+- Datos: CIR (Central de Información de Riesgos) — **confidenciales**, alojados en Banco de España
+- Los archivos `.dta` locales son **datos ficticios/sintéticos** para desarrollo. Los resultados locales no tienen validez estadística — es lo esperado.
+- Flujo: desarrollar `.do` en local → enviar a Banco de España → recibir resultados en `.smcl`
+- Archivo principal: `compartidos6/archivo_final.do`
+- Coautores: Gabriel, Anna, Sergio (y otros)
+
+---
+
+## Herramientas y metodología
+
+### Stata (herramienta principal)
+- `reghdfe` para regresiones con efectos fijos de alta dimensión
+- `ppmlhdfe` para variables count (Poisson preferido sobre ln(1+n))
+- LPM preferido sobre logit/probit cuando hay efectos fijos de alta dimensión
+- `vce(cluster id_empresa)` como estándar; `vce(cluster id_empresa cnae_2d)` para two-way clustering
+- Efectos fijos habituales: empresa (`id_empresa`), año (`anual`), provincia×año (`cpro_time`), sector×año (`cnae_2d_time`)
+- Local projections con `F{h}.var` y `tsset id_empresa anual`
+- `esttab` / `estout` para exportar tablas
+
+### Python (análisis complementario)
+- `pyreadstat` para leer `.dta`
+- `linearmodels` o regresión manual para replicar `reghdfe`
+- Scripts de barrido masivo de especificaciones (outputs en `.xlsx`)
+
+### Convenciones Stata
+- Todo do-file empieza con:
   ```stata
   clear all
   set more off
   cap log close
   ```
-- Use `global` macros for all file paths at the top of master do-files
-- Never hardcode absolute paths inside analysis scripts — use `$root`, `$data`, `$output`
-- Raw data in `data/raw/` is **never modified** — all transformations go in `data/clean/`
-- Name do-files descriptively: `01_clean_survey.do`, `02_merge_panel.do`, `03_regressions_main.do`
-- Log files saved to `output/logs/`
-- Label all variables and values in the dataset before saving clean data
-
-### File naming
-- Use lowercase with underscores: `family_governance_2024.dta`
-- Date-stamp outputs: `table1_20240601.tex`
+- Rutas con `cap cd` múltiples para compatibilidad entre máquinas
+- Variables etiquetadas antes de guardar datos limpios
+- Nombres de do-files con fecha: `archivo_final_20260601.do`
 
 ---
 
-## Project Structure
+## Metodología econométrica — principios
 
-Every project created with `/newproject` follows this layout:
+- **Diseño antes que resultados**: definir estrategia empírica antes de mirar coeficientes
+- Reportar siempre coeficientes + errores estándar, no solo stars
+- Significancia económica tan importante como estadística
+- En modelos polinomiales: respetar el **principio de marginalidad** (incluir términos de orden inferior salvo hipótesis teórica explícita)
+- IV/2SLS: solo si el primer estadio es sólido. Instrumentos débiles → reduced form directa
+- Event study con leads/lags para verificar parallel trends antes de DiD
+
+---
+
+## Estructura de proyecto (generada por /newproject)
 
 ```
-project-name/
-├── CLAUDE.md              # Copied from this template
-├── README.md              # Project-specific notes (auto-generated)
+proyecto/
+├── CLAUDE.md              # Copiado de este template
+├── README.md              # Notas específicas del proyecto
 ├── code/
-│   ├── stata/             # Stata do-files
-│   └── python/            # Python scripts (data wrangling, scraping)
+│   ├── stata/
+│   └── python/
 ├── data/
-│   ├── raw/               # Original data — READ ONLY
-│   └── clean/             # Transformed/merged datasets
+│   ├── raw/               # Solo lectura — nunca modificar
+│   └── clean/
 ├── output/
-│   ├── tables/            # LaTeX, CSV tables
-│   ├── figures/           # PDF, PNG figures
-│   └── logs/              # Stata log files
-├── documents/             # Reference PDFs, papers, reports
-├── decks/                 # Presentations (PowerPoint, Beamer)
-├── notes/                 # Scratch notes and ideas
-└── progress_logs/         # Session continuity logs (YYYY-MM-DD_description.md)
+│   ├── tables/
+│   ├── figures/
+│   └── logs/
+├── documents/             # PDFs de referencia
+├── decks/                 # Presentaciones
+├── notes/
+└── progress_logs/         # Logs de sesión (YYYY-MM-DD_descripcion.md)
 ```
 
 ---
 
-## Presentations
+## Continuidad entre sesiones
 
-- Audience is often **family business owners and executives** — not academics
-- Lead with the practical implication, not the methodology
-- One key message per slide
-- Titles should be assertions ("Family firms outperform in the long run"), not topics ("Performance")
-- Avoid jargon; define terms when necessary
-- Use real examples and cases from Spanish/Balearic family businesses when possible
-
----
-
-## Session Continuity
-
-At the start of each session, check `progress_logs/` for the most recent log.
-At the end of each session, write a log entry:
-```
-progress_logs/YYYY-MM-DD_description.md
-```
-Include: what was done, what decisions were made, what is pending next.
+- Al inicio de cada sesión: leer el log más reciente en `progress_logs/`
+- Al final de cada sesión: escribir `progress_logs/YYYY-MM-DD_descripcion.md` con:
+  - Qué se hizo
+  - Decisiones tomadas
+  - Qué queda pendiente
 
 ---
 
-## Key Contacts & Collaborators
-<!-- Add collaborators as they join projects -->
+## Presentaciones
+
+- Audiencia académica: metodología primero, resultados después
+- Audiencia empresarial (Cátedra Empresa Familiar): mensaje económico primero, metodología al final o en apéndice
+- Títulos de slides = afirmaciones, no temas ("Las firmas MOU pierden acceso al crédito", no "Resultados")
+- Una idea por slide
 
 ---
 
-## Notes for Claude
-- When writing Stata code, follow the conventions above strictly
-- When preparing presentations, assume a non-academic audience unless told otherwise
-- Always check `progress_logs/` at the start of a session to restore context
-- Prefer concise output — academic prose, not bullet-point summaries
-- When uncertain about a methodological choice, say so and present options
+## Notas para Claude
+
+- Responder siempre en inglés salvo que el usuario escriba en español
+- Al leer `archivo_final.do` (>2000 líneas), usar offset+limit por secciones
+- Los datos locales son ficticios — no interpretar resultados locales como válidos
+- Cuando el usuario traiga un log `.smcl` con líneas `RESULT|...`, extraerlas para construir tablas LaTeX
+- Si hay duda metodológica, presentar opciones con pros/contras antes de implementar
